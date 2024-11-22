@@ -27,7 +27,7 @@
         <!-- Right Section -->
         <div class="hidden md:flex items-center space-x-4">
           <span v-if="isAuthenticated" class="text-sm">
-            Logged in as: <strong>{{ user?.email }}</strong>
+            Logged in as: <strong>{{ user?.email||"Loading ..." }}</strong>
           </span>
           <button
             v-if="isAuthenticated"

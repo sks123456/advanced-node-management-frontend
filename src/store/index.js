@@ -22,6 +22,17 @@ export default createStore({
       localStorage.removeItem("token");
       localStorage.removeItem("user");
     },
+    setUser(state, userData) {
+      // Normalize API response data to match state structure
+      const normalizedUser = {
+        email: userData.Email,  // Map API's 'Email' to state's 'email'
+        id: userData.ID,        // Map API's 'ID' to state's 'id'
+        name: userData.Name,    // Map API's 'Name' to state's 'name'
+      };
+  
+      state.user = normalizedUser;  // Update the user state
+      localStorage.setItem("user", JSON.stringify(normalizedUser));  // Update localStorage
+    },
   },
   actions: {
     async login({ commit }, credentials) {
@@ -33,6 +44,18 @@ export default createStore({
     },
     logout({ commit }) {
       commit("clearToken");
+    },
+    async fetchUserProfile({ commit, state }) {
+      console.log("trying to fetch user profile")
+      try {
+        const response = await axios.get("http://localhost:8080/users/profile", {
+          headers: { Authorization: `Bearer ${state.token}` },
+        });
+        console.log(response)
+        commit("setUser", response.data); // Update the user state with the fetched profile
+      } catch (error) {
+        console.error("Failed to fetch user profile:", error);
+      }
     },
   },
 });

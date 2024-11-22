@@ -46,6 +46,7 @@
 <script>
 import api from "@/services/api";
 import EditUserModal from "@/components/EditUserModal.vue"; // Import the modal component
+import { mapActions } from 'vuex';
 
 export default {
   components: {
@@ -61,6 +62,8 @@ export default {
     };
   },
   methods: {
+    ...mapActions(["fetchUserProfile"]), // Map the fetchUserProfile action from Vuex
+
     async fetchUsers() {
       try {
         const response = await api.get("/users");
@@ -84,8 +87,16 @@ export default {
     async updateUser(user) {
       try {
         const { ID, Name, Email } = user;
-        const response = await api.put(`/users/${ID}`, { Name, Email }); // Update user via API
-        this.$store.dispatch("updateUser", response.data);
+        await api.put(`/users/${ID}`, { Name, Email }); // Update user via API
+      
+        // Dispatch fetchUserProfile to refresh Vuex store
+        console.log(this.$store.state.user)
+        console.log(ID)
+      if (this.$store.state.user?.id === ID) {
+        console.log("hehe")
+        await this.fetchUserProfile(); 
+      }
+
         this.fetchUsers(); // Refresh the user list
         this.closeEditModal(); // Close the modal
         this.showToast("User updated successfully!", "success");
