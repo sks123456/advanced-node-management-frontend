@@ -36,11 +36,11 @@ export default createStore({
   },
   actions: {
     async login({ commit }, credentials) {
-      const response = await axios.post("http://localhost:8080/login", credentials);
+      const response = await axios.post(`${process.env.BACKEND_URL}/login`, credentials);
       commit("setToken", { token: response.data.token, user: response.data.user });
     },
     async register(_, userData) {
-      await axios.post("http://localhost:8080/register", userData);
+      await axios.post(`${process.env.BACKEND_URL}/register`, userData);
     },
     logout({ commit }) {
       commit("clearToken");
@@ -48,7 +48,7 @@ export default createStore({
     async fetchUserProfile({ commit, state }) {
       console.log("trying to fetch user profile")
       try {
-        const response = await axios.get("http://localhost:8080/users/profile", {
+        const response = await axios.get(`${process.env.BACKEND_URL}/users/profile`, {
           headers: { Authorization: `Bearer ${state.token}` },
         });
         console.log(response)

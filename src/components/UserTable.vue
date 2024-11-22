@@ -93,7 +93,7 @@ export default {
         console.log(this.$store.state.user)
         console.log(ID)
       if (this.$store.state.user?.id === ID) {
-        console.log("hehe")
+        // console.log("hehe")
         await this.fetchUserProfile(); 
       }
 

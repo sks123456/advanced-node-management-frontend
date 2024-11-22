@@ -4,7 +4,7 @@ import router from "@/router"; // Import the router to redirect users
 
 
 const api = axios.create({
-  baseURL: "http://localhost:8080",
+  baseURL: process.env.BACKEND_URL,
 });
 
 api.interceptors.request.use((config) => {
