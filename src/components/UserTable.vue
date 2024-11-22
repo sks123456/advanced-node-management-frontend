@@ -18,7 +18,7 @@
           <td class="px-4 py-2 text-center">
             <button
               class="px-2 py-1 text-white bg-blue-500 hover:bg-blue-600 rounded"
-              @click="editUser(user)"
+              @click="openEditModal(user)"
             >
               Edit
             </button>
@@ -32,16 +32,32 @@
         </tr>
       </tbody>
     </table>
+
+    <!-- Edit User Modal -->
+    <EditUserModal
+      :isOpen="isEditModalOpen"
+      :user="selectedUser"
+      @close="closeEditModal"
+      @save="updateUser"
+    />
   </div>
 </template>
 
 <script>
 import api from "@/services/api";
+import EditUserModal from "@/components/EditUserModal.vue"; // Import the modal component
 
 export default {
+  components: {
+    EditUserModal,
+  },
+  inject: ["showToast"], // Access the showToast method from App.vue
+
   data() {
     return {
       users: [],
+      isEditModalOpen: false,
+      selectedUser: null, // Local copy of the user being edited
     };
   },
   methods: {
@@ -49,19 +65,46 @@ export default {
       try {
         const response = await api.get("/users");
         this.users = response.data;
+        this.showToast("Users fetched successfully!", "success");
+
       } catch (error) {
-        console.error("Failed to fetch users:", error);
+        const errorMessage = error.response?.data?.error || "Failed to fetch users.";
+        this.showToast(errorMessage, "error");
+
       }
     },
-    editUser(user) {
-      console.log("Edit User:", user);
+    openEditModal(user) {
+      this.selectedUser = { ...user }; // Clone the user data to avoid direct mutation
+      this.isEditModalOpen = true;
+    },
+    closeEditModal() {
+      this.isEditModalOpen = false;
+      this.selectedUser = null;
+    },
+    async updateUser(user) {
+      try {
+        const { ID, Name, Email } = user;
+        const response = await api.put(`/users/${ID}`, { Name, Email }); // Update user via API
+        this.$store.dispatch("updateUser", response.data);
+        this.fetchUsers(); // Refresh the user list
+        this.closeEditModal(); // Close the modal
+        this.showToast("User updated successfully!", "success");
+
+      } catch (error) {
+        const errorMessage = error.response?.data?.error||"Failed to Update";
+        this.showToast(errorMessage, "error");      
+      }
     },
     async deleteUser(ID) {
       try {
         await api.delete(`/users/${ID}`);
         this.fetchUsers();
+        this.showToast("Users deleted successfully!", "success");
+
       } catch (error) {
         console.error("Failed to delete user:", error);
+        const errorMessage = error.response?.data?.error || "Failed deleting users.";
+        this.showToast(errorMessage, "error"); 
       }
     },
   },
@@ -70,3 +113,7 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+/* Add custom styling if needed */
+</style>

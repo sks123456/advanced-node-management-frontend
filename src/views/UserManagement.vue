@@ -9,16 +9,22 @@
         Add User
       </button>
     </div>
-    <user-table />
+    <user-table ref="userTable" />
 
     <!-- Add User Modal -->
-    <add-user-modal v-if="showAddUserModal" @close="showAddUserModal = false" />
+    <add-user-modal
+      v-if="showAddUserModal"
+      :modalTitle="'Register New User'"
+      @close="showAddUserModal = false"
+      @save="registerUser"
+    />
   </div>
 </template>
 
 <script>
 import UserTable from "@/components/UserTable.vue";
 import AddUserModal from "@/components/AddUserModal.vue";
+import api from "@/services/api"; // Assuming this is the axios instance
 
 export default {
   components: {
@@ -29,6 +35,23 @@ export default {
     return {
       showAddUserModal: false,
     };
+  },
+  methods: {
+    async registerUser(userData) {
+      try {
+        // Call the /register endpoint
+        await api.post("/register", userData);
+
+        // Close the modal
+        this.showAddUserModal = false;
+
+        // Refresh the UserTable
+        this.$refs.userTable.fetchUsers();
+      } catch (error) {
+        console.error("Failed to register user:", error.response?.data?.message || error.message);
+        alert("Failed to register user. Please check the details and try again.");
+      }
+    },
   },
 };
 </script>
