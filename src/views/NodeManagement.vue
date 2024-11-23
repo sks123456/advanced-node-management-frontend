@@ -9,16 +9,29 @@
         Add Node
       </button>
     </div>
-    <node-table />
+    <node-table
+      ref="nodeTable"
+      @edit-node="editNode"
+      @delete-node="deleteNode"
+      @update-status="updateNodeStatus"
+      @update-health="updateNodeHealthStatus"
+    />
 
-    <!-- Add Node Modal -->
-    <add-node-modal v-if="showAddNodeModal" @close="showAddNodeModal = false" />
+    <!-- Add/Edit Node Modal -->
+    <add-node-modal
+      v-if="showAddNodeModal || showEditNodeModal"
+      :isEditMode="showEditNodeModal"
+      :node="selectedNode"
+      @close="closeModal"
+      @save="saveNode"
+    />
   </div>
 </template>
 
 <script>
 import NodeTable from "@/components/NodeTable.vue";
 import AddNodeModal from "@/components/AddNodeModal.vue";
+import axiosInstance from "@/services/api";
 
 export default {
   components: {
@@ -28,7 +41,58 @@ export default {
   data() {
     return {
       showAddNodeModal: false,
+      showEditNodeModal: false,
+      selectedNode: null,
     };
+  },
+  methods: {
+    async saveNode(nodeData) {
+      try {
+        if (this.showEditNodeModal) {
+          await axiosInstance.put(`/nodes/${nodeData.ID}`, nodeData); // Use nodeData.ID
+        } else {
+          await axiosInstance.post("/nodes", nodeData);
+        }
+        this.$refs.nodeTable.fetchNodes();
+        this.closeModal();
+      } catch (error) {
+        console.error("Failed to save node:", error);
+        alert("Failed to save node. Please try again.");
+      }
+    },
+    closeModal() {
+      this.showAddNodeModal = false;
+      this.showEditNodeModal = false;
+      this.selectedNode = null;
+    },
+    editNode(node) {
+      this.selectedNode = { ...node }; // Pass the complete node object with backend field names
+      this.showEditNodeModal = true;
+    },
+    async deleteNode(nodeId) {
+      try {
+        await axiosInstance.delete(`/nodes/${nodeId}`);
+        this.$refs.nodeTable.fetchNodes();
+      } catch (error) {
+        console.error("Failed to delete node:", error);
+      }
+    },
+    async updateNodeStatus(nodeId, status) {
+      try {
+        await axiosInstance.post(`/nodes/${nodeId}/${ status }`);
+        this.$refs.nodeTable.fetchNodes();
+      } catch (error) {
+        console.error("Failed to update node status:", error);
+      }
+    },
+    async updateNodeHealthStatus(nodeId, healthStatus) {
+      try {
+        await axiosInstance.put(`/nodes/${nodeId}`, { health_status: healthStatus });
+        this.$refs.nodeTable.fetchNodes();
+      } catch (error) {
+        console.error("Failed to update node health status:", error);
+      }
+    },
   },
 };
 </script>

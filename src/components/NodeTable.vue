@@ -1,68 +1,61 @@
 <template>
-  <div class="p-4 bg-gray-100 min-h-screen">
-    <h1 class="text-2xl font-bold mb-4 text-gray-800">Node List</h1>
-    <table class="table-auto w-full bg-white shadow-md rounded">
-      <thead>
-        <tr class="bg-gray-200 text-gray-700">
-          <th class="px-4 py-2 text-left">ID</th>
-          <th class="px-4 py-2 text-left">Name</th>
-          <th class="px-4 py-2 text-left">IP</th>
-          <th class="px-4 py-2 text-left">Status</th>
-          <th class="px-4 py-2 text-left">Health</th>
-          <th class="px-4 py-2">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="node in nodes"
-          :key="node.id"
-          class="border-b hover:bg-gray-50"
-        >
-          <td class="px-4 py-2">{{ node.id }}</td>
-          <td class="px-4 py-2">{{ node.name }}</td>
-          <td class="px-4 py-2">{{ node.ip }}</td>
-          <td
-            class="px-4 py-2"
-            :class="{
-              'text-green-500 font-bold': node.status === 'Running',
-              'text-red-500 font-bold': node.status === 'Stopped',
-            }"
+  <table class="table-auto w-full bg-white shadow-md rounded">
+    <thead>
+      <tr class="bg-gray-200 text-gray-700">
+        <th class="px-4 py-2 text-left">ID</th>
+        <th class="px-4 py-2 text-left">Name</th>
+        <th class="px-4 py-2 text-left">IP</th>
+        <th class="px-4 py-2 text-left">Port</th>
+        <th class="px-4 py-2 text-left">Location</th>
+        <th class="px-4 py-2 text-left">Status</th>
+        <th class="px-4 py-2 text-left">Health</th>
+        <th class="px-4 py-2 text-left">Last Checked</th>
+        <th class="px-4 py-2 text-center">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+        v-for="node in nodes"
+        :key="node.id"
+        class="border-b hover:bg-gray-50"
+      >
+        <td class="px-4 py-2">{{ node.ID }}</td>
+        <td class="px-4 py-2">{{ node.Name }}</td>
+        <td class="px-4 py-2">{{ node.IP }}</td>
+        <td class="px-4 py-2">{{ node.Port }}</td>
+        <td class="px-4 py-2">{{ node.Location }}</td>
+        <td class="px-4 py-2">{{ node.Status }}</td>
+        <td class="px-4 py-2">{{ node.HealthStatus }}</td>
+        <td class="px-4 py-2">{{ formatDate(node.LastChecked) }}</td>
+        <td class="px-4 py-2 text-center">
+          <button
+            class="px-2 py-1 bg-blue-500 text-white rounded"
+            @click="$emit('edit-node', node)"
           >
-            {{ node.status }}
-          </td>
-          <td
-            class="px-4 py-2"
-            :class="{
-              'text-green-500 font-bold': node.health_status === 'Healthy',
-              'text-red-500 font-bold': node.health_status === 'Unhealthy',
-            }"
+            Edit
+          </button>
+          <button
+            class="px-2 py-1 bg-red-500 text-white rounded ml-2"
+            @click="$emit('delete-node', node.ID)"
           >
-            {{ node.health_status }}
-          </td>
-          <td class="px-4 py-2 text-center">
-            <button
-              class="px-2 py-1 text-white bg-blue-500 hover:bg-blue-600 rounded"
-              @click="startNode(node.id)"
-            >
-              Start
-            </button>
-            <button
-              class="px-2 py-1 text-white bg-red-500 hover:bg-red-600 rounded ml-2"
-              @click="stopNode(node.id)"
-            >
-              Stop
-            </button>
-            <button
-              class="px-2 py-1 text-white bg-gray-500 hover:bg-gray-600 rounded ml-2"
-              @click="deleteNode(node.id)"
-            >
-              Delete
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+            Delete
+          </button>
+          <button
+            class="px-2 py-1 bg-green-500 text-white rounded ml-2"
+            @click="$emit('update-status', node.ID, 'start')"
+          >
+            Start
+          </button>
+          <button
+            class="px-2 py-1 bg-gray-500 text-white rounded ml-2"
+            @click="$emit('update-status', node.ID, 'stop')"
+          >
+            Stop
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </template>
 
 <script>
@@ -83,29 +76,10 @@ export default {
         console.error("Failed to fetch nodes:", error);
       }
     },
-    async startNode(id) {
-      try {
-        await axiosInstance.post(`/nodes/${id}/start`);
-        this.fetchNodes();
-      } catch (error) {
-        console.error("Failed to start node:", error);
-      }
-    },
-    async stopNode(id) {
-      try {
-        await axiosInstance.post(`/nodes/${id}/stop`);
-        this.fetchNodes();
-      } catch (error) {
-        console.error("Failed to stop node:", error);
-      }
-    },
-    async deleteNode(id) {
-      try {
-        await axiosInstance.delete(`/nodes/${id}`);
-        this.fetchNodes();
-      } catch (error) {
-        console.error("Failed to delete node:", error);
-      }
+    formatDate(isoDate) {
+    if (!isoDate) return "N/A"; // Handle null or undefined values
+    const date = new Date(isoDate);
+    return date.toLocaleString(); // Converts to local date and time
     },
   },
   mounted() {
