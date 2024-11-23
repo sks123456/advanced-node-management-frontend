@@ -1,5 +1,5 @@
 import { createStore } from "vuex";
-import axios from "axios";
+import axiosInstance from "@/services/api";
 
 export default createStore({
   state: {
@@ -36,11 +36,11 @@ export default createStore({
   },
   actions: {
     async login({ commit }, credentials) {
-      const response = await axios.post(`${process.env.BACKEND_URL}/login`, credentials);
+      const response = await axiosInstance.post(`/login`, credentials);
       commit("setToken", { token: response.data.token, user: response.data.user });
     },
     async register(_, userData) {
-      await axios.post(`${process.env.BACKEND_URL}/register`, userData);
+      await axiosInstance.post(`/register`, userData);
     },
     logout({ commit }) {
       commit("clearToken");
@@ -48,7 +48,7 @@ export default createStore({
     async fetchUserProfile({ commit, state }) {
       console.log("trying to fetch user profile")
       try {
-        const response = await axios.get(`${process.env.BACKEND_URL}/users/profile`, {
+        const response = await axiosInstance.get(`${process.env.BACKEND_URL}/users/profile`, {
           headers: { Authorization: `Bearer ${state.token}` },
         });
         console.log(response)

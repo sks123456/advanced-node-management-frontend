@@ -66,7 +66,7 @@
 </template>
 
 <script>
-import api from "@/services/api";
+import axiosInstance from "@/services/api";
 
 export default {
   data() {
@@ -77,7 +77,7 @@ export default {
   methods: {
     async fetchNodes() {
       try {
-        const response = await api.get("/nodes");
+        const response = await axiosInstance.get("/nodes");
         this.nodes = response.data;
       } catch (error) {
         console.error("Failed to fetch nodes:", error);
@@ -85,7 +85,7 @@ export default {
     },
     async startNode(id) {
       try {
-        await api.post(`/nodes/${id}/start`);
+        await axiosInstance.post(`/nodes/${id}/start`);
         this.fetchNodes();
       } catch (error) {
         console.error("Failed to start node:", error);
@@ -93,7 +93,7 @@ export default {
     },
     async stopNode(id) {
       try {
-        await api.post(`/nodes/${id}/stop`);
+        await axiosInstance.post(`/nodes/${id}/stop`);
         this.fetchNodes();
       } catch (error) {
         console.error("Failed to stop node:", error);
@@ -101,7 +101,7 @@ export default {
     },
     async deleteNode(id) {
       try {
-        await api.delete(`/nodes/${id}`);
+        await axiosInstance.delete(`/nodes/${id}`);
         this.fetchNodes();
       } catch (error) {
         console.error("Failed to delete node:", error);

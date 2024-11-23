@@ -24,7 +24,7 @@
 <script>
 import UserTable from "@/components/UserTable.vue";
 import AddUserModal from "@/components/AddUserModal.vue";
-import api from "@/services/api"; // Assuming this is the axios instance
+import axiosInstance from "@/services/api";
 
 export default {
   components: {
@@ -40,7 +40,7 @@ export default {
     async registerUser(userData) {
       try {
         // Call the /register endpoint
-        await api.post("/register", userData);
+        await axiosInstance.post("/register", userData);
 
         // Close the modal
         this.showAddUserModal = false;

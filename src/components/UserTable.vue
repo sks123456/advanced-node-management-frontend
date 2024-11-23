@@ -44,7 +44,7 @@
 </template>
 
 <script>
-import api from "@/services/api";
+import axiosInstance from "@/services/api";
 import EditUserModal from "@/components/EditUserModal.vue"; // Import the modal component
 import { mapActions } from 'vuex';
 
@@ -66,7 +66,7 @@ export default {
 
     async fetchUsers() {
       try {
-        const response = await api.get("/users");
+        const response = await axiosInstance.get("/users");
         this.users = response.data;
         this.showToast("Users fetched successfully!", "success");
 
@@ -87,7 +87,7 @@ export default {
     async updateUser(user) {
       try {
         const { ID, Name, Email } = user;
-        await api.put(`/users/${ID}`, { Name, Email }); // Update user via API
+        await axiosInstance.put(`/users/${ID}`, { Name, Email }); // Update user via axiosInstance
       
         // Dispatch fetchUserProfile to refresh Vuex store
         console.log(this.$store.state.user)
@@ -108,7 +108,7 @@ export default {
     },
     async deleteUser(ID) {
       try {
-        await api.delete(`/users/${ID}`);
+        await axiosInstance.delete(`/users/${ID}`);
         this.fetchUsers();
         this.showToast("Users deleted successfully!", "success");
 

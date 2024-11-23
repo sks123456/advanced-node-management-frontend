@@ -2,12 +2,14 @@ import axios from "axios";
 import store from "@/store";
 import router from "@/router"; // Import the router to redirect users
 
-
-const api = axios.create({
-  baseURL: process.env.BACKEND_URL,
+const baseUrl = process.env.VUE_APP_BACKEND_URL;
+console.log('Backend URL:', baseUrl); // Debug: Verify the output
+const axiosInstance = axios.create({
+  baseURL: baseUrl || 'http://localhost:8080', // Provide a fallback
 });
 
-api.interceptors.request.use((config) => {
+
+axiosInstance.interceptors.request.use((config) => {
   const token = store.state.token;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -16,7 +18,7 @@ api.interceptors.request.use((config) => {
 });
 
 // Response interceptor to handle errors
-api.interceptors.response.use(
+axiosInstance.interceptors.response.use(
   (response) => {
     return response;
   },
@@ -39,4 +41,4 @@ api.interceptors.response.use(
   }
 );
 
-export default api;
+export default axiosInstance;
