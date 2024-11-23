@@ -49,7 +49,7 @@ export default {
     async saveNode(nodeData) {
       try {
         if (this.showEditNodeModal) {
-          await axiosInstance.put(`/nodes/${nodeData.ID}`, nodeData); // Use nodeData.ID
+          await axiosInstance.put(`/nodes/${nodeData.ID}`, nodeData);
         } else {
           await axiosInstance.post("/nodes", nodeData);
         }
@@ -75,22 +75,34 @@ export default {
         this.$refs.nodeTable.fetchNodes();
       } catch (error) {
         console.error("Failed to delete node:", error);
+        const errorMessage = error.response?.data?.error||"Failed to Delete Node";
+        this.showToast(errorMessage, "error");   
       }
     },
     async updateNodeStatus(nodeId, status) {
       try {
         await axiosInstance.post(`/nodes/${nodeId}/${ status }`);
         this.$refs.nodeTable.fetchNodes();
+        this.showToast("Node updated successfully!", "success");
+
       } catch (error) {
         console.error("Failed to update node status:", error);
+        const errorMessage = error.response?.data?.error||"Failed to update node status";
+        this.showToast(errorMessage, "error");      
+
       }
     },
     async updateNodeHealthStatus(nodeId, healthStatus) {
       try {
         await axiosInstance.put(`/nodes/${nodeId}`, { health_status: healthStatus });
         this.$refs.nodeTable.fetchNodes();
+        this.showToast("Node Health Status Changed!", "success");
+
       } catch (error) {
         console.error("Failed to update node health status:", error);
+        const errorMessage = error.response?.data?.error||"Failed to update node health status";
+        this.showToast(errorMessage, "error");      
+
       }
     },
   },
