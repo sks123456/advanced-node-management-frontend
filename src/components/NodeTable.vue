@@ -24,18 +24,41 @@
         <td class="px-4 py-2">{{ node.IP }}</td>
         <td class="px-4 py-2">{{ node.Port }}</td>
         <td class="px-4 py-2">{{ node.Location }}</td>
-        <td class="px-4 py-2">{{ node.Status }}</td>
+        
+        <!-- Status with Color Code and Icon -->
         <td class="px-4 py-2">
           <span
             :class="{
-              'text-green-500 font-bold': node.HealthStatus === 'Healthy',
-              'text-red-500 font-bold': node.HealthStatus === 'Unhealthy',
+              'text-green-500 font-bold flex items-center': node.Status === 'Running',
+              'text-red-500 font-bold flex items-center': node.Status === 'Stopped',
             }"
           >
+            <font-awesome-icon
+              :icon="node.Status === 'Running' ? 'play-circle' : 'stop-circle'"
+              class="mr-2"
+            />
+            {{ node.Status }}
+          </span>
+        </td>
+
+        <td class="px-4 py-2">
+          <span
+            :class="{
+              'text-green-500 font-bold flex items-center': node.HealthStatus === 'Healthy',
+              'text-red-500 font-bold flex items-center': node.HealthStatus === 'Unhealthy',
+            }"
+          >
+            <font-awesome-icon
+              :icon="node.HealthStatus === 'Healthy' ? 'check-circle' : 'times-circle'"
+              class="mr-2"
+            />
             {{ node.HealthStatus }}
           </span>
         </td>
+
         <td class="px-4 py-2">{{ formatDate(node.LastChecked) }}</td>
+
+        <!-- Actions -->
         <td class="px-4 py-2 text-center">
           <button
             class="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
@@ -54,14 +77,16 @@
           >
             Delete
           </button>
+
           <button
             class="px-2 py-1 bg-green-500 text-white rounded ml-2"
             @click="$emit('update-status', node.ID, 'start')"
           >
             Start
           </button>
+
           <button
-            class="px-2 py-1 bg-gray-500 text-white rounded ml-2 hover:bg-gray-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            class="px-2 py-1 bg-orange-500 text-white rounded ml-2 hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
             :disabled="node.Status !== 'Running'"
             :title="node.Status !== 'Running' ? 'Node must be running to stop' : ''"
             @click="$emit('update-status', node.ID, 'stop')"
@@ -73,6 +98,7 @@
     </tbody>
   </table>
 </template>
+
 
 <script>
 import axiosInstance from "@/services/api";
