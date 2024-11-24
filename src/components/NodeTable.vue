@@ -25,17 +25,31 @@
         <td class="px-4 py-2">{{ node.Port }}</td>
         <td class="px-4 py-2">{{ node.Location }}</td>
         <td class="px-4 py-2">{{ node.Status }}</td>
-        <td class="px-4 py-2">{{ node.HealthStatus }}</td>
+        <td class="px-4 py-2">
+          <span
+            :class="{
+              'text-green-500 font-bold': node.HealthStatus === 'Healthy',
+              'text-red-500 font-bold': node.HealthStatus === 'Unhealthy',
+            }"
+          >
+            {{ node.HealthStatus }}
+          </span>
+        </td>
         <td class="px-4 py-2">{{ formatDate(node.LastChecked) }}</td>
         <td class="px-4 py-2 text-center">
           <button
-            class="px-2 py-1 bg-blue-500 text-white rounded"
+            class="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            :disabled="node.Status !== 'Stopped'"
+            :title="node.Status !== 'Stopped' ? 'Node must be stopped to edit' : ''"
             @click="$emit('edit-node', node)"
           >
             Edit
           </button>
+
           <button
-            class="px-2 py-1 bg-red-500 text-white rounded ml-2"
+            class="px-2 py-1 bg-red-500 text-white rounded ml-2 hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            :disabled="node.Status !== 'Stopped'"
+            :title="node.Status !== 'Stopped' ? 'Node must be stopped to delete' : ''"
             @click="$emit('delete-node', node.ID)"
           >
             Delete
@@ -47,7 +61,9 @@
             Start
           </button>
           <button
-            class="px-2 py-1 bg-gray-500 text-white rounded ml-2"
+            class="px-2 py-1 bg-gray-500 text-white rounded ml-2 hover:bg-gray-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            :disabled="node.Status !== 'Running'"
+            :title="node.Status !== 'Running' ? 'Node must be running to stop' : ''"
             @click="$emit('update-status', node.ID, 'stop')"
           >
             Stop
@@ -62,9 +78,12 @@
 import axiosInstance from "@/services/api";
 
 export default {
+  inject: ["showToast"], // Access the showToast method from App.vue
+
   data() {
     return {
       nodes: [],
+      socket: null, // WebSocket connection
     };
   },
   methods: {
@@ -76,14 +95,64 @@ export default {
         console.error("Failed to fetch nodes:", error);
       }
     },
+    setupWebSocket() {
+      this.socket = new WebSocket("ws://localhost:8080/ws");
+
+      this.socket.onopen = () => {
+        console.log("WebSocket connection established");
+      };
+
+      this.socket.onmessage = (event) => {
+        console.log("WebSocket message received:", event.data);
+
+        const data = JSON.parse(event.data);
+
+        // Find the corresponding node in the table
+        const node = this.nodes.find((n) => n.ID === data.node_id);
+
+        if (node) {
+          // Check if the HealthStatus has changed
+          if (node.HealthStatus !== data.health_status) {
+            // Show toast message based on the health status
+            if (data.health_status === "Healthy") {
+              this.showToast(`Node ${node.Name} is now Healthy`, "success");
+            } else {
+              this.showToast(`Node ${node.Name} is now Unhealthy`, "error");
+            }
+          }
+
+          // Update the node's health status and last checked timestamp
+          node.HealthStatus = data.health_status;
+          node.LastChecked = new Date();
+          console.log(
+            `Updated node ${node.ID} health status to ${node.HealthStatus}`
+          );
+        }
+      };
+
+      this.socket.onclose = () => {
+        console.log("WebSocket connection closed");
+      };
+
+      this.socket.onerror = (error) => {
+        console.error("WebSocket error:", error);
+      };
+    },
+
     formatDate(isoDate) {
-    if (!isoDate) return "N/A"; // Handle null or undefined values
-    const date = new Date(isoDate);
-    return date.toLocaleString(); // Converts to local date and time
+      if (!isoDate) return "N/A";
+      const date = new Date(isoDate);
+      return date.toLocaleString();
     },
   },
   mounted() {
     this.fetchNodes();
+    this.setupWebSocket();
+  },
+  beforeUnmount() {
+    if (this.socket) {
+      this.socket.close();
+    }
   },
 };
 </script>

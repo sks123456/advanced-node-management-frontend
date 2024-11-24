@@ -38,6 +38,8 @@ export default {
     NodeTable,
     AddNodeModal,
   },
+  inject: ["showToast"], // Access the showToast method from App.vue
+
   data() {
     return {
       showAddNodeModal: false,
@@ -50,8 +52,11 @@ export default {
       try {
         if (this.showEditNodeModal) {
           await axiosInstance.put(`/nodes/${nodeData.ID}`, nodeData);
+          this.showToast("Node Updated Successfully",)
+
         } else {
           await axiosInstance.post("/nodes", nodeData);
+          this.showToast("Node Created Successfully",)
         }
         this.$refs.nodeTable.fetchNodes();
         this.closeModal();

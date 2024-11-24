@@ -84,8 +84,3 @@
     },
   };
   </script>
-  
-  <style scoped>
-  /* Optional: Add custom styles for the modal */
-  </style>
-  

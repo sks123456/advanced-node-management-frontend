@@ -4,7 +4,7 @@ import NodeManagement from '@/views/NodeManagement.vue';
 import HomePage from '@/views/HomePage.vue';
 import LoginPage from '@/views/LoginPage.vue';
 import RegisterPage from '@/views/RegisterPage.vue';
-import store from '@/store'; // Ensure store is properly imported for state management
+import store from '@/store';
 
 const routes = [
   { path: "/login", name: 'Login', component: LoginPage, meta: { requiresAuth: false } },

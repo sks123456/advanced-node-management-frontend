@@ -1,9 +1,9 @@
 import axios from "axios";
 import store from "@/store";
-import router from "@/router"; // Import the router to redirect users
+import router from "@/router";
 
 const baseUrl = process.env.VUE_APP_BACKEND_URL;
-console.log('Backend URL:', baseUrl); // Debug: Verify the output
+// console.log('Backend URL:', baseUrl); 
 const axiosInstance = axios.create({
   baseURL: baseUrl || 'http://localhost:8080', // Provide a fallback
 });
